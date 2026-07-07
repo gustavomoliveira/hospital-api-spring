@@ -14,8 +14,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(PacienteJaExisteException.class)
     public ResponseEntity<ErrorResponseDTO> handlePacienteJaExisteException(PacienteJaExisteException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ErrorResponseDTO(HttpStatus.NOT_FOUND.value(), e.getMessage(), LocalDateTime.now()));
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorResponseDTO(HttpStatus.CONFLICT.value(), e.getMessage(), LocalDateTime.now()));
     }
 
     @ExceptionHandler(PacienteNaoExisteException.class)
@@ -26,8 +26,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MedicoJaExisteException.class)
     public ResponseEntity<ErrorResponseDTO> handleMedicoJaExisteException(MedicoJaExisteException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ErrorResponseDTO(HttpStatus.NOT_FOUND.value(), e.getMessage(), LocalDateTime.now()));
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorResponseDTO(HttpStatus.CONFLICT.value(), e.getMessage(), LocalDateTime.now()));
     }
 
     @ExceptionHandler(MedicoNaoExisteException.class)
