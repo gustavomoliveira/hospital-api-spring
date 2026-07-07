@@ -1,5 +1,6 @@
 package dev.gustavo.at.domain.medico;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +16,7 @@ public class MedicoController {
     private final MedicoService service;
 
     @PostMapping
-    public ResponseEntity<MedicoResponseDTO> cadastrarMedico(@RequestBody MedicoRequestDTO dto) {
+    public ResponseEntity<MedicoResponseDTO> cadastrarMedico(@RequestBody @Valid MedicoRequestDTO dto) {
         MedicoResponseDTO response = service.cadastrarMedico(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

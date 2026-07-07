@@ -1,5 +1,6 @@
 package dev.gustavo.at.domain.paciente;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,7 +16,7 @@ public class PacienteController {
     private final PacienteService service;
 
     @PostMapping
-    public ResponseEntity<PacienteResponseDTO> cadastrarPaciente(@RequestBody PacienteRequestDTO dto) {
+    public ResponseEntity<PacienteResponseDTO> cadastrarPaciente(@RequestBody @Valid PacienteRequestDTO dto) {
         PacienteResponseDTO response = service.criarPaciente(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
