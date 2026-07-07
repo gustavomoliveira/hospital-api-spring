@@ -9,8 +9,6 @@ import dev.gustavo.at.exception.PacienteNaoExisteException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class ConsultaService {
