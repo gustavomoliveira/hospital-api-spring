@@ -2,7 +2,7 @@
 
 *[Ler em português](README.pt-BR.md)*
 
-A REST API for managing a hospital's core records — patients, doctors, appointments, and admissions — built with Spring Boot and PostgreSQL.
+A REST API for managing a hospital's core records — patients, doctors, appointments, and admissions — built with Spring Boot and PostgreSQL. Unlike an in-memory H2 setup, this assignment's scope specifically called for practicing a production-style relational database, which is why Postgres is a real running dependency here rather than something embedded.
 
 Stack: **Java 21, Spring Boot 4.1.0, Spring Data JPA, Bean Validation, PostgreSQL (runtime), H2 (test), Lombok, JUnit 5 + Mockito, Maven**.
 
@@ -24,6 +24,8 @@ The API exposes CRUD-style endpoints over four domain entities:
 | `Consulta` (Appointment) | `/consultas` | Yes — create only |
 | `Internacao` (Admission) | — | No — modeled as a JPA entity, not yet exposed through any controller/service/repository |
 
+`Internacao` staying entity-only isn't an oversight — it follows the assignment's guidelines exactly, which scoped full CRUD exposure to `Paciente`, `Medico`, and `Consulta` only.
+
 Beyond plain CRUD, `GET /medicos/consultas/ranking` returns doctors ordered by their total number of appointments, computed with a single aggregate query rather than loaded and counted in Java.
 
 On startup, a `DataLoader` (`CommandLineRunner`) seeds two doctors and two patients if the tables are empty — useful to have data to hit the API against immediately after starting the service.
@@ -42,7 +44,7 @@ domain/consulta/    → same shape, for Consulta
 domain/internacao/  → only the entity so far
 ```
 
-Cross-cutting concerns that don't belong to one feature — the two generic exception classes, the global exception handler, `DataLoader` — sit outside `domain/`, in `exception/` and `insfrastructure/` respectively. This trades off against a layered style (grouping all controllers together, all services together, and so on): here, everything about "patients" is in one place, at the cost of not having a single `controller/` folder to scan for every endpoint in the system.
+Cross-cutting concerns that don't belong to one feature — the two generic exception classes, the global exception handler, `DataLoader` — sit outside `domain/`, in `exception/` and `infrastructure/` respectively. This trades off against a layered style (grouping all controllers together, all services together, and so on): here, everything about "patients" is in one place, at the cost of not having a single `controller/` folder to scan for every endpoint in the system.
 
 ### 2. DTOs and mapping kept explicit and manual
 
@@ -91,17 +93,12 @@ This gives fast, isolated coverage of business rules and slower, end-to-end cove
 
 > Instructions assume **macOS** with a terminal.
 
-This service needs a running PostgreSQL instance — unlike an H2-in-memory setup, there's a real database to have available before starting the app.
+**Docker is the official way to run this project.** It starts Postgres and the app together with a single command, without needing Java or Postgres installed directly on your machine (aside from Docker itself). A manual, no-Docker walkthrough is also included further down for local development inside an IDE.
 
 ### Prerequisites
 
-- **JDK 21** installed and selected (`java -version` should print 21).
-- **PostgreSQL** installed locally. Easiest way on macOS is via Homebrew:
-  ```bash
-  brew install postgresql@16
-  brew services start postgresql@16
-  ```
-- No local Maven install is required — the project ships its own Maven Wrapper (`mvnw`).
+- **Docker Desktop for Mac** installed and running.
+- No local Maven, Java, or Postgres install is required for the Docker path — everything runs inside the containers.
 
 ### 1. Clone the repository
 
@@ -110,31 +107,31 @@ git clone https://github.com/gustavomoliveira/hospital-api-spring.git
 cd hospital-api-spring
 ```
 
-### 2. Create the database
+### 2. Set up the `.env` file
+
+The `docker-compose.yml` reads the Postgres password from a `POSTGRES_PASSWORD` variable in a local `.env` file (git-ignored, never committed). Copy the template and fill in a real password:
 
 ```bash
-createdb hospital
+cp .env.example .env
 ```
 
-### 3. Set the environment variables the app expects
+Then open `.env` and set a real value for `POSTGRES_PASSWORD`.
 
-`application.properties` reads these three variables with no fallback, so the app won't start without them:
+### 3. Build the application jar
+
+The `Dockerfile` copies a pre-built jar rather than compiling inside the container, so build it first:
 
 ```bash
-export DB_URL=jdbc:postgresql://localhost:5432/hospital
-export DB_USERNAME=$(whoami)
-export DB_PASSWORD=
+./mvnw clean package -DskipTests
 ```
 
-If your local Postgres user needs a password, set `DB_PASSWORD` accordingly; a fresh Homebrew install typically has no password on the default superuser.
-
-### 4. Run the application
+### 4. Start Postgres and the app together
 
 ```bash
-./mvnw spring-boot:run
+docker compose up --build
 ```
 
-On first run, the `DataLoader` seeds two doctors and two patients automatically — you don't need to create data manually before trying the endpoints.
+This starts a Postgres container and the Spring Boot app container, wired together on the same Docker network. On first run, the `DataLoader` seeds two doctors and two patients automatically.
 
 ### 5. Verify it's running
 
@@ -154,25 +151,46 @@ Both seeded doctors should appear with `totalConsultas: 0`, since no appointment
 
 ### 7. Run the test suite
 
-Tests don't need Postgres or the environment variables above — they run entirely against H2:
+Tests run entirely against an in-memory H2 database and don't need Postgres or Docker running at all:
 
 ```bash
 ./mvnw test
 ```
 
+### Running without Docker (for IDE-based local development)
+
+If you're actively developing and want to run the app directly from IntelliJ or the terminal without containers, this needs a real PostgreSQL instance installed locally instead of the one Docker provides.
+
+**Prerequisites:**
+
+- **JDK 21** installed and selected (`java -version` should print 21).
+- **PostgreSQL** installed locally via Homebrew:
+  ```bash
+  brew install postgresql@16
+  brew services start postgresql@16
+  ```
+
+**Steps:**
+
+1. Create the database:
+   ```bash
+   createdb hospital
+   ```
+2. Set the environment variables `application.properties` expects (no fallback values exist, so the app won't start without them):
+   ```bash
+   export DB_URL=jdbc:postgresql://localhost:5432/hospital
+   export DB_USERNAME=$(whoami)
+   export DB_PASSWORD=
+   ```
+   If your local Postgres user needs a password, set `DB_PASSWORD` accordingly; a fresh Homebrew install typically has no password on the default superuser.
+3. Run the application:
+   ```bash
+   ./mvnw spring-boot:run
+   ```
+
 ### Opening in IntelliJ
 
-Open `pom.xml` at the repository root as a project in IntelliJ. Before running `AtApplication` from the IDE, set the three environment variables above in the run configuration (**Run → Edit Configurations → Environment variables**), otherwise the app fails to start with a datasource error.
-
-### Running via Docker instead
-
-The repository also ships a `Dockerfile` and a `docker-compose.yml` that start Postgres and the app together, reading the database password from `POSTGRES_PASSWORD` in a local `.env` file (git-ignored; copy `.env.example` to `.env` and fill in a real password before running). One thing to know: the `Dockerfile` copies a pre-built `target/*.jar` rather than building it inside the container, so you need to run `./mvnw clean package -DskipTests` first.
-
-```bash
-cp .env.example .env   # then edit .env with a real password
-./mvnw clean package -DskipTests
-docker compose up --build
-```
+Open `pom.xml` at the repository root as a project in IntelliJ. If you're running without Docker, set the three environment variables above in the run configuration (**Run → Edit Configurations → Environment variables**) before running `AtApplication`, otherwise the app fails to start with a datasource error.
 
 ## Project structure
 
@@ -192,7 +210,7 @@ hospital-api-spring/
     │   │   │   ├── consulta/     # Consulta entity, controller, service, repository, DTOs, mapper
     │   │   │   └── internacao/   # Internacao entity only — no controller/service/repository yet
     │   │   ├── exception/        # domain-specific exceptions (shared across features)
-    │   │   └── insfrastructure/
+    │   │   └── infrastructure/
     │   │       ├── config/       # DataLoader
     │   │       └── exception/    # GlobalExceptionHandler, ErrorResponseDTO
     │   └── resources/
@@ -206,5 +224,3 @@ hospital-api-spring/
         └── resources/
             └── application.properties   # H2 datasource, overrides the main profile for tests
 ```
-
-Note the package name is `insfrastructure` (not `infrastructure`) — that's how it's spelled in the actual source tree.
