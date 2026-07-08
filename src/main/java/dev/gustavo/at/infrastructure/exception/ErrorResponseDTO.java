@@ -1,4 +1,4 @@
-package dev.gustavo.at.insfrastructure.exception;
+package dev.gustavo.at.infrastructure.exception;
 
 import java.time.LocalDateTime;
 

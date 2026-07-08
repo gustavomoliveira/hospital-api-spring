@@ -1,4 +1,4 @@
-package dev.gustavo.at.insfrastructure.exception;
+package dev.gustavo.at.infrastructure.exception;
 
 import dev.gustavo.at.exception.MedicoJaExisteException;
 import dev.gustavo.at.exception.MedicoNaoExisteException;

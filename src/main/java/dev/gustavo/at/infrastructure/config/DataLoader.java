@@ -1,4 +1,4 @@
-package dev.gustavo.at.insfrastructure.config;
+package dev.gustavo.at.infrastructure.config;
 
 import dev.gustavo.at.domain.medico.*;
 import dev.gustavo.at.domain.paciente.*;
