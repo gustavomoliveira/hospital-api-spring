@@ -42,7 +42,7 @@ domain/consulta/    → same shape, for Consulta
 domain/internacao/  → only the entity so far
 ```
 
-Cross-cutting concerns that don't belong to one feature — the two generic exception classes, the global exception handler, `DataLoader` — sit outside `domain/`, in `exception/` and `insfrastructure/` respectively. The trade-off is the opposite of the layered style used in other projects: here, everything about "patients" is in one place, at the cost of not having a single `controller/` folder to scan for every endpoint in the system.
+Cross-cutting concerns that don't belong to one feature — the two generic exception classes, the global exception handler, `DataLoader` — sit outside `domain/`, in `exception/` and `insfrastructure/` respectively. This trades off against a layered style (grouping all controllers together, all services together, and so on): here, everything about "patients" is in one place, at the cost of not having a single `controller/` folder to scan for every endpoint in the system.
 
 ### 2. DTOs and mapping kept explicit and manual
 

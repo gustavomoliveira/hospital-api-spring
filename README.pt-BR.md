@@ -42,7 +42,7 @@ domain/consulta/    → mesma estrutura, para Consulta
 domain/internacao/  → só a entidade, por enquanto
 ```
 
-Preocupações transversais que não pertencem a uma única feature — as duas classes de exceção genéricas, o exception handler global, o `DataLoader` — ficam fora de `domain/`, em `exception/` e `insfrastructure/`, respectivamente. O trade-off é o oposto do estilo em camadas usado em outros projetos: aqui, tudo sobre "pacientes" está num só lugar, ao custo de não ter uma única pasta `controller/` pra escanear todos os endpoints do sistema.
+Preocupações transversais que não pertencem a uma única feature — as duas classes de exceção genéricas, o exception handler global, o `DataLoader` — ficam fora de `domain/`, em `exception/` e `insfrastructure/`, respectivamente. Isso é um trade-off em relação a um estilo em camadas (agrupar todos os controllers juntos, todos os services juntos, e assim por diante): aqui, tudo sobre "pacientes" está num só lugar, ao custo de não ter uma única pasta `controller/` pra escanear todos os endpoints do sistema.
 
 ### 2. DTOs e mapeamento mantidos explícitos e manuais
 
